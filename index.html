@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Personal Finance Pro</title>
+  <title>Personal Finance AI</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,21 +25,24 @@
         R
       </div>
       <div>
-        <h1 class="text-sm font-bold leading-tight">Catat Reksi Dan Zubai</h1>
+        <h1 class="text-sm font-bold leading-tight">Reksi Manager AI</h1>
         <p class="text-xs text-slate-400">Keuangan Personal Pro</p>
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <button onclick="toggleModal('backupModal')" title="Backup & Restore" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200">
+      <button onclick="toggleModal('apiKeyModal')" title="Set Gemini AI Key" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center">
+        <i class="fa-solid fa-key text-xs"></i>
+      </button>
+      <button onclick="toggleModal('backupModal')" title="Backup Data" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200">
         <i class="fa-solid fa-cloud-arrow-down text-xs"></i>
       </button>
-      <button onclick="resetAllData()" title="Reset Data" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-500 flex items-center justify-center">
+      <button onclick="resetAllData()" title="Reset" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-500 flex items-center justify-center">
         <i class="fa-solid fa-power-off text-xs"></i>
       </button>
     </div>
   </div>
 
-  <!-- Ringkasan Saldo & Multi-Dompet -->
+  <!-- Main Balance Card -->
   <div class="card-gradient rounded-3xl p-5 text-white shadow-xl shadow-blue-500/10 space-y-4">
     <div class="flex items-center justify-between text-xs text-blue-200">
       <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> TOTAL KEKAYAAN</span>
@@ -50,7 +53,6 @@
 
     <div class="text-2xl font-extrabold tracking-tight" id="totalBalance">Rp 0</div>
 
-    <!-- Rincian Dompet -->
     <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center">
       <div class="bg-white/5 rounded-xl p-2">
         <div class="text-[10px] text-blue-200">Tunai</div>
@@ -66,7 +68,6 @@
       </div>
     </div>
 
-    <!-- Income / Expense Pill -->
     <div class="grid grid-cols-2 gap-2 pt-1">
       <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-xl">
         <i class="fa-solid fa-arrow-down text-emerald-400 text-xs"></i>
@@ -85,13 +86,13 @@
     </div>
   </div>
 
-  <!-- Budgeting Bulanan -->
+  <!-- Budgeting Bar -->
   <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
     <div class="flex items-center justify-between text-xs">
       <span class="font-bold text-slate-700 flex items-center gap-1.5">
-        <i class="fa-solid fa-bullseye text-blue-600"></i> Limit Anggaran Bulanan
+        <i class="fa-solid fa-bullseye text-blue-600"></i> Limit Bulanan
       </span>
-      <button onclick="setBudgetPrompt()" class="text-blue-600 font-semibold hover:underline">Ubah Limit</button>
+      <button onclick="setBudgetPrompt()" class="text-blue-600 font-semibold hover:underline">Ubah</button>
     </div>
     <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
       <div id="budgetProgress" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
@@ -105,17 +106,15 @@
   <!-- Target Tabungan (Pockets) -->
   <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
     <div class="flex items-center justify-between">
-      <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Kantong Target Tabungan</h3>
+      <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Kantong Tabungan</h3>
       <button onclick="toggleModal('pocketModal')" class="text-xs text-blue-600 font-semibold flex items-center gap-1">
         <i class="fa-solid fa-plus"></i> Tambah
       </button>
     </div>
-    <div id="pocketList" class="space-y-2.5">
-      <!-- List kantong dirender via JS -->
-    </div>
+    <div id="pocketList" class="space-y-2.5"></div>
   </div>
 
-  <!-- Grafik Pengeluaran -->
+  <!-- Chart Distribusi -->
   <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
     <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Distribusi Pengeluaran</h3>
     <div class="w-full max-h-48 flex justify-center items-center">
@@ -123,64 +122,105 @@
     </div>
   </div>
 
-  <!-- Form Transaksi Baru -->
+  <!-- Form Transaksi & AI Scanner -->
   <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Catat Transaksi</h3>
+    <div class="flex items-center justify-between">
+      <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Catat Transaksi</h3>
+      <!-- AI SCAN BUTTON -->
+      <button type="button" onclick="triggerAIScan()" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all">
+        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Scan AI
+      </button>
+      <input type="file" id="aiReceiptInput" accept="image/*" capture="environment" class="hidden" onchange="processReceiptWithAI(event)">
+    </div>
+
+    <!-- AI Loading State Banner -->
+    <div id="aiStatus" class="hidden bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs p-3 rounded-xl flex items-center gap-2.5">
+      <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+      <div>
+        <div class="font-bold">Gemini AI sedang membaca struk...</div>
+        <div class="text-[10px] text-indigo-500">Mengekstrak nominal, toko, dan kategori otomatis.</div>
+      </div>
+    </div>
+
     <form id="txForm" onsubmit="addTransaction(event)" class="space-y-2.5">
       <div class="grid grid-cols-2 gap-2">
-        <select id="txType" onchange="updateCategoryOptions()" class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500">
+        <select id="txType" onchange="handleTypeChange()" class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 font-medium">
           <option value="expense">Pengeluaran (-)</option>
           <option value="income">Pemasukan (+)</option>
+          <option value="transfer">Transfer Saldo (⇄)</option>
         </select>
-        <select id="txWallet" class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500">
+        <select id="txWallet" class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
           <option value="Cash">Tunai (Cash)</option>
           <option value="Bank">Rekening Bank</option>
           <option value="E-Wallet">E-Wallet</option>
         </select>
       </div>
-      <div class="grid grid-cols-2 gap-2">
-        <input type="number" inputmode="numeric" id="txAmount" placeholder="Nominal (Rp)" required class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500">
-        <select id="txCategory" class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500">
-          <!-- Kategori dirender via JS -->
+
+      <div id="transferTargetContainer" class="hidden">
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ke Dompet Tujuan:</label>
+        <select id="txToWallet" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
+          <option value="Bank">Rekening Bank</option>
+          <option value="Cash">Tunai (Cash)</option>
+          <option value="E-Wallet">E-Wallet</option>
         </select>
       </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <input type="number" inputmode="numeric" id="txAmount" placeholder="Nominal (Rp)" required class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500">
+        <select id="txCategory" class="bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5"></select>
+      </div>
+
       <input type="text" id="txDesc" placeholder="Keterangan transaksi" required class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500">
+      
       <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/20">
         Simpan Transaksi
       </button>
     </form>
   </div>
 
-  <!-- Pencarian & Filter -->
+  <!-- Filter & History -->
   <div class="space-y-2">
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-bold text-slate-800">Aktivitas Keuangan</h3>
       <span class="text-xs text-slate-400" id="txCount">0 Transaksi</span>
     </div>
     <div class="grid grid-cols-3 gap-2">
-      <input type="text" id="searchInput" oninput="renderUI()" placeholder="Cari..." class="col-span-2 bg-white border border-slate-200 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500">
-      <select id="filterCategory" onchange="renderUI()" class="bg-white border border-slate-200 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500">
-        <option value="ALL">Semua Kategori</option>
+      <input type="text" id="searchInput" oninput="renderUI()" placeholder="Cari..." class="col-span-2 bg-white border border-slate-200 text-xs rounded-xl p-2.5">
+      <select id="filterCategory" onchange="renderUI()" class="bg-white border border-slate-200 text-xs rounded-xl p-2">
+        <option value="ALL">Semua</option>
       </select>
     </div>
-    <div id="txList" class="space-y-2 pt-1">
-      <!-- List transaksi dirender via JS -->
-    </div>
+    <div id="txList" class="space-y-2 pt-1"></div>
   </div>
 
-  <!-- Footer Identitas -->
+  <!-- Footer -->
   <div class="text-center text-[11px] text-slate-400 pt-6">
-    Dibuat oleh <span class="font-semibold text-slate-600">Reksi</span> • Personal Manager v2.0
+    Dibuat oleh <span class="font-semibold text-slate-600">Reksi</span> • AI Personal Manager v3.0
+  </div>
+
+  <!-- MODAL: Setting API Key -->
+  <div id="apiKeyModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-5 max-w-xs w-full space-y-3 shadow-xl">
+      <div class="flex justify-between items-center">
+        <h4 class="text-sm font-bold text-slate-800">Setup Gemini API Key</h4>
+        <button onclick="toggleModal('apiKeyModal')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-[11px] text-slate-500 leading-relaxed">
+        Dapatkan API Key gratis di <b>aistudio.google.com</b> untuk mengaktifkan pemindaian struk AI otomatis.
+      </p>
+      <input type="password" id="geminiApiKeyInput" placeholder="Tempel API Key di sini (AIzaSy...)" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
+      <button onclick="saveApiKey()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-xl font-semibold">Simpan API Key</button>
+    </div>
   </div>
 
   <!-- MODAL: Tambah Kantong -->
   <div id="pocketModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-5 max-w-xs w-full space-y-3 shadow-xl">
-      <h4 class="text-sm font-bold text-slate-800">Tambah Target Kantong</h4>
+      <h4 class="text-sm font-bold text-slate-800">Target Kantong</h4>
       <form onsubmit="addPocket(event)" class="space-y-2">
-        <input type="text" id="pocketName" placeholder="Nama target (cth: Beli Laptop)" required class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
+        <input type="text" id="pocketName" placeholder="Nama target" required class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
         <input type="number" id="pocketTarget" placeholder="Target nominal (Rp)" required class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
-        <input type="number" id="pocketCurrent" placeholder="Saldo awal terkumpul (Rp)" required class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
+        <input type="number" id="pocketCurrent" placeholder="Saldo awal (Rp)" required class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5">
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="toggleModal('pocketModal')" class="flex-1 bg-slate-100 text-slate-600 text-xs py-2 rounded-xl">Batal</button>
           <button type="submit" class="flex-1 bg-blue-600 text-white text-xs py-2 rounded-xl font-semibold">Simpan</button>
@@ -189,39 +229,41 @@
     </div>
   </div>
 
-  <!-- MODAL: Backup & Restore -->
+  <!-- MODAL: Backup -->
   <div id="backupModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-5 max-w-xs w-full space-y-4 shadow-xl">
       <div class="flex justify-between items-center">
-        <h4 class="text-sm font-bold text-slate-800">Cadangan & Pemulihan</h4>
-        <button onclick="toggleModal('backupModal')" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        <h4 class="text-sm font-bold text-slate-800">Cadangan Data</h4>
+        <button onclick="toggleModal('backupModal')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-2">
         <button onclick="exportJSON()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 text-xs py-2.5 rounded-xl font-medium flex items-center justify-center gap-2">
-          <i class="fa-solid fa-file-code"></i> Cadangkan Data (JSON)
+          <i class="fa-solid fa-file-code"></i> Cadangkan (JSON)
         </button>
         <button onclick="exportCSV()" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs py-2.5 rounded-xl font-medium flex items-center justify-center gap-2">
-          <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel (CSV)
+          <i class="fa-solid fa-file-excel"></i> Ekspor (CSV)
         </button>
       </div>
       <div class="pt-2 border-t border-slate-100">
-        <label class="block text-[11px] font-medium text-slate-500 mb-1.5">Pulihkan dari File Cadangan (JSON):</label>
+        <label class="block text-[11px] font-medium text-slate-500 mb-1.5">Pulihkan JSON:</label>
         <input type="file" id="importFileInput" accept=".json" onchange="importJSON(event)" class="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:bg-slate-100 file:text-slate-700">
       </div>
     </div>
   </div>
 
-  <!-- Script Logika Aplikasi -->
+  <!-- JavaScript Logic -->
   <script>
     let isBalanceHidden = false;
     let transactions = JSON.parse(localStorage.getItem('my_tx_data') || '[]');
     let pockets = JSON.parse(localStorage.getItem('my_pockets_data') || '[]');
     let monthlyBudget = parseFloat(localStorage.getItem('my_monthly_budget') || '3000000');
+    let geminiApiKey = localStorage.getItem('my_gemini_api_key') || '';
     let chartInstance = null;
 
     const categories = {
       expense: ['Makanan', 'Transport', 'Tagihan', 'Belanja', 'Hiburan', 'Kesehatan', 'Lainnya'],
-      income: ['Gaji', 'Bonus', 'Investasi', 'Penjualan', 'Lainnya']
+      income: ['Gaji', 'Bonus', 'Investasi', 'Penjualan', 'Lainnya'],
+      transfer: ['Mutasi Rekening', 'Tarik Tunai', 'Top Up E-Wallet', 'Lainnya']
     };
 
     function formatRupiah(num) {
@@ -235,18 +277,120 @@
     }
 
     function toggleModal(id) {
-      const modal = document.getElementById(id);
-      modal.classList.toggle('hidden');
+      document.getElementById(id).classList.toggle('hidden');
     }
 
-    function updateCategoryOptions() {
+    function saveApiKey() {
+      const val = document.getElementById('geminiApiKeyInput').value.trim();
+      if (!val) return alert('API Key tidak boleh kosong.');
+      geminiApiKey = val;
+      localStorage.setItem('my_gemini_api_key', val);
+      alert('Gemini API Key tersimpan!');
+      toggleModal('apiKeyModal');
+    }
+
+    function triggerAIScan() {
+      if (!geminiApiKey) {
+        alert('Silakan masukkan Gemini API Key terlebih dahulu.');
+        toggleModal('apiKeyModal');
+        return;
+      }
+      document.getElementById('aiReceiptInput').click();
+    }
+
+    // Convert file to base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    // CORE AI SCANNER FUNCTION
+    async function processReceiptWithAI(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const statusBox = document.getElementById('aiStatus');
+      statusBox.classList.remove('hidden');
+
+      try {
+        const base64Image = await fileToBase64(file);
+        
+        const prompt = `Analisis foto struk/nota belanja ini. Ekstrak data dalam format JSON murni tanpa markdown:
+        {
+          "merchant": "nama toko/merchant atau barang utama (singkat max 4 kata)",
+          "total": nominal angka total akhir pembayaran setelah diskon/pajak (integer),
+          "category": "pilih salah satu: Makanan, Transport, Tagihan, Belanja, Hiburan, Kesehatan, Lainnya"
+        }`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inline_data: { mime_type: file.type || "image/jpeg", data: base64Image } }
+              ]
+            }],
+            generationConfig: { response_mime_type: "application/json" }
+          })
+        });
+
+        const data = await response.json();
+        statusBox.classList.add('hidden');
+
+        if (data.error) throw new Error(data.error.message);
+
+        const aiResultText = data.candidates[0].content.parts[0].text;
+        const result = JSON.parse(aiResultText);
+
+        if (!result.total || result.total <= 0) {
+          throw new Error('Total belanja tidak ditemukan di foto struk.');
+        }
+
+        // Simpan Otomatis
+        const newTx = {
+          id: Date.now(),
+          type: 'expense',
+          wallet: document.getElementById('txWallet').value || 'Cash',
+          toWallet: null,
+          amount: Number(result.total),
+          category: result.category || 'Belanja',
+          desc: result.merchant ? `${result.merchant} (AI Scan)` : 'Belanja (AI Scan)',
+          date: new Date().toISOString()
+        };
+
+        transactions.unshift(newTx);
+        localStorage.setItem('my_tx_data', JSON.stringify(transactions));
+        renderUI();
+
+        alert(`✨ AI Berhasil Mencatat:\n• Toko: ${result.merchant}\n• Total: ${formatRupiah(result.total)}\n• Kategori: ${result.category}`);
+      } catch (err) {
+        statusBox.classList.add('hidden');
+        alert('Gagal memproses struk dengan AI: ' + err.message);
+      }
+    }
+
+    function handleTypeChange() {
       const type = document.getElementById('txType').value;
+      const transferBox = document.getElementById('transferTargetContainer');
       const catSelect = document.getElementById('txCategory');
+
+      if (type === 'transfer') {
+        transferBox.classList.remove('hidden');
+      } else {
+        transferBox.classList.add('hidden');
+      }
+
       catSelect.innerHTML = categories[type].map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
     function setBudgetPrompt() {
-      const input = prompt('Tentukan batas pengeluaran bulanan (Rp):', monthlyBudget);
+      const input = prompt('Batas pengeluaran bulanan (Rp):', monthlyBudget);
       if (input !== null && !isNaN(input) && Number(input) > 0) {
         monthlyBudget = parseFloat(input);
         localStorage.setItem('my_monthly_budget', monthlyBudget);
@@ -258,16 +402,23 @@
       e.preventDefault();
       const type = document.getElementById('txType').value;
       const wallet = document.getElementById('txWallet').value;
+      const toWallet = document.getElementById('txToWallet').value;
       const amount = parseFloat(document.getElementById('txAmount').value);
       const category = document.getElementById('txCategory').value;
       const desc = document.getElementById('txDesc').value;
 
       if (!amount || amount <= 0) return;
 
+      if (type === 'transfer' && wallet === toWallet) {
+        alert('Dompet asal dan tujuan tidak boleh sama.');
+        return;
+      }
+
       const newTx = {
         id: Date.now(),
         type,
         wallet,
+        toWallet: type === 'transfer' ? toWallet : null,
         amount,
         category,
         desc,
@@ -277,7 +428,7 @@
       transactions.unshift(newTx);
       localStorage.setItem('my_tx_data', JSON.stringify(transactions));
       document.getElementById('txForm').reset();
-      updateCategoryOptions();
+      handleTypeChange();
       renderUI();
     }
 
@@ -309,7 +460,7 @@
     }
 
     function resetAllData() {
-      if (confirm('Hapus seluruh data (transaksi, kantong, limit)?')) {
+      if (confirm('Hapus seluruh data?')) {
         localStorage.clear();
         transactions = [];
         pockets = [];
@@ -329,16 +480,16 @@
     }
 
     function exportCSV() {
-      if (transactions.length === 0) return alert('Belum ada data transaksi.');
-      let csv = 'ID,Tanggal,Tipe,Dompet,Kategori,Keterangan,Nominal\n';
+      if (transactions.length === 0) return alert('Belum ada transaksi.');
+      let csv = 'ID,Tanggal,Tipe,Dari Dompet,Ke Dompet,Kategori,Keterangan,Nominal\n';
       transactions.forEach(t => {
-        csv += `${t.id},"${new Date(t.date).toLocaleDateString('id-ID')}","${t.type}","${t.wallet}","${t.category}","${t.desc.replace(/"/g, '""')}",${t.amount}\n`;
+        csv += `${t.id},"${new Date(t.date).toLocaleDateString('id-ID')}","${t.type}","${t.wallet}","${t.toWallet || '-'}","${t.category}","${t.desc.replace(/"/g, '""')}",${t.amount}\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `riwayat_transaksi_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `riwayat_${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
     }
 
@@ -355,11 +506,11 @@
           localStorage.setItem('my_tx_data', JSON.stringify(transactions));
           localStorage.setItem('my_pockets_data', JSON.stringify(pockets));
           localStorage.setItem('my_monthly_budget', monthlyBudget);
-          alert('Data berhasil dipulihkan!');
+          alert('Data dipulihkan!');
           toggleModal('backupModal');
           renderUI();
         } catch (err) {
-          alert('Format file JSON tidak valid.');
+          alert('Format JSON tidak valid.');
         }
       };
       reader.readAsText(file);
@@ -405,16 +556,18 @@
         if (t.type === 'income') {
           income += val;
           wallets[t.wallet] = (wallets[t.wallet] || 0) + val;
-        } else {
+        } else if (t.type === 'expense') {
           expense += val;
           wallets[t.wallet] = (wallets[t.wallet] || 0) - val;
           expenseCategories[t.category] = (expenseCategories[t.category] || 0) + val;
+        } else if (t.type === 'transfer') {
+          wallets[t.wallet] = (wallets[t.wallet] || 0) - val;
+          wallets[t.toWallet] = (wallets[t.toWallet] || 0) + val;
         }
       });
 
       const totalBalance = income - expense;
 
-      // Update Card Header
       document.getElementById('totalBalance').innerText = isBalanceHidden ? 'Rp ••••••••' : formatRupiah(totalBalance);
       document.getElementById('totalIncome').innerText = isBalanceHidden ? 'Rp ••••••' : formatRupiah(income);
       document.getElementById('totalExpense').innerText = isBalanceHidden ? 'Rp ••••••' : formatRupiah(expense);
@@ -422,7 +575,6 @@
       document.getElementById('walletBank').innerText = isBalanceHidden ? '••••' : formatRupiah(wallets.Bank || 0);
       document.getElementById('walletEWallet').innerText = isBalanceHidden ? '••••' : formatRupiah(wallets['E-Wallet'] || 0);
 
-      // Budgeting Limit Bar
       const percentSpent = Math.min(Math.round((expense / monthlyBudget) * 100), 100);
       const progressBar = document.getElementById('budgetProgress');
       progressBar.style.width = `${percentSpent}%`;
@@ -430,7 +582,6 @@
       document.getElementById('budgetSpent').innerText = `Terpakai: ${formatRupiah(expense)} (${percentSpent}%)`;
       document.getElementById('budgetMax').innerText = `Limit: ${formatRupiah(monthlyBudget)}`;
 
-      // Kantong Tabungan
       const pocketContainer = document.getElementById('pocketList');
       pocketContainer.innerHTML = pockets.length === 0 ? '<div class="text-[11px] text-slate-400 text-center py-2">Belum ada target tabungan.</div>' :
         pockets.map(p => {
@@ -451,14 +602,12 @@
           `;
         }).join('');
 
-      // Filter & List Transaksi
       const searchQuery = document.getElementById('searchInput').value.toLowerCase();
       const filterCat = document.getElementById('filterCategory').value;
 
-      // Update Filter Options
       const allUsedCats = Array.from(new Set(transactions.map(t => t.category)));
       const filterSelect = document.getElementById('filterCategory');
-      filterSelect.innerHTML = `<option value="ALL">Semua Kategori</option>` + allUsedCats.map(c => `<option value="${c}" ${filterCat === c ? 'selected' : ''}>${c}</option>`).join('');
+      filterSelect.innerHTML = `<option value="ALL">Semua</option>` + allUsedCats.map(c => `<option value="${c}" ${filterCat === c ? 'selected' : ''}>${c}</option>`).join('');
 
       const filteredTx = transactions.filter(t => {
         const matchSearch = t.desc.toLowerCase().includes(searchQuery) || t.category.toLowerCase().includes(searchQuery);
@@ -470,32 +619,50 @@
 
       const listContainer = document.getElementById('txList');
       listContainer.innerHTML = filteredTx.length === 0 ? '<div class="text-center text-xs text-slate-400 py-6">Tidak ada transaksi ditemukan.</div>' :
-        filteredTx.map(t => `
-          <div class="bg-white p-3 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl ${t.type === 'income' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} flex items-center justify-center text-xs">
-                <i class="fa-solid ${t.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+        filteredTx.map(t => {
+          let iconClass = 'bg-rose-50 text-rose-600 fa-arrow-up';
+          let sign = '-';
+          let amountColor = 'text-slate-800';
+          let walletInfo = `${t.category} • <span class="text-blue-500 font-medium">${t.wallet}</span>`;
+
+          if (t.type === 'income') {
+            iconClass = 'bg-emerald-50 text-emerald-600 fa-arrow-down';
+            sign = '+';
+            amountColor = 'text-emerald-600';
+          } else if (t.type === 'transfer') {
+            iconClass = 'bg-blue-50 text-blue-600 fa-repeat';
+            sign = '⇄';
+            amountColor = 'text-blue-600';
+            walletInfo = `Transfer: <span class="font-medium text-slate-700">${t.wallet}</span> → <span class="font-medium text-blue-600">${t.toWallet}</span>`;
+          }
+
+          return `
+            <div class="bg-white p-3 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl ${iconClass.split(' ')[0]} ${iconClass.split(' ')[1]} flex items-center justify-center text-xs">
+                  <i class="fa-solid ${iconClass.split(' ')[2]}"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-slate-800">${t.desc}</div>
+                  <div class="text-[10px] text-slate-400">${walletInfo} • ${new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</div>
+                </div>
               </div>
-              <div>
-                <div class="text-xs font-bold text-slate-800">${t.desc}</div>
-                <div class="text-[10px] text-slate-400">${t.category} • <span class="text-blue-500 font-medium">${t.wallet}</span> • ${new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</div>
+              <div class="flex items-center gap-2.5">
+                <span class="text-xs font-bold ${amountColor}">
+                  ${sign} ${isBalanceHidden ? '••••' : formatRupiah(t.amount)}
+                </span>
+                <button onclick="deleteTransaction(${t.id})" class="text-slate-300 hover:text-rose-500 text-xs">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
               </div>
             </div>
-            <div class="flex items-center gap-2.5">
-              <span class="text-xs font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
-                ${t.type === 'income' ? '+' : '-'} ${isBalanceHidden ? '••••' : formatRupiah(t.amount)}
-              </span>
-              <button onclick="deleteTransaction(${t.id})" class="text-slate-300 hover:text-rose-500 text-xs">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
 
       updateChart(expenseCategories);
     }
 
-    updateCategoryOptions();
+    handleTypeChange();
     renderUI();
   </script>
 </body>
